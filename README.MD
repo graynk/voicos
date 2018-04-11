@@ -13,7 +13,7 @@ pip install --upgrade python-telegram-bot
 pip install --upgrade TinyTag
 pip install --upgrade google-cloud
 ```
-2. Go to [Google Cloud](https://cloud.google.com/) and set up a new project. You will need Google Speech API and Google Storage
+2. Go to [Google Cloud](https://cloud.google.com/) and set up a new project. You will need Google Speech API. For messages longer than 1m you will also need Google Storage
 3. Generate new service account and download a private key as JSON
 4. Set environment variable _GOOGLE_APPLICATION_CREDENTIALS_ to the file path of the JSON key (see [here](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries) for more instructions)
 5. Install [gcloud](https://cloud.google.com/sdk/docs/) tool and follow the instructions to authenicate
@@ -24,4 +24,4 @@ pip install --upgrade google-cloud
 `python3 bot.py`
 
 ## Usage
-Launch the bot, forward the voice message, easy. Works in group chats as well.
+Launch the bot, forward the voice message, easy. Works in group chats as well. For messages longer than 1 minute the bot uses long recognition with uploading to Google Storage
