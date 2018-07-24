@@ -5,6 +5,7 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
+from telegram.ext.dispatcher import run_async
 from telegram import ChatAction
 from tinytag import TinyTag
 from google.cloud import speech
@@ -17,20 +18,24 @@ import io
 TOKEN = 'YOUR_TOKEN'
 PORT = int(os.environ.get('PORT', '5002'))
 BUCKET_NAME = 'YOUR_BUCKET_NAME'
+ADMIN_CHAT_ID = 123456
 updater = Updater(TOKEN)
 dispatcher = updater.dispatcher
 
 
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="YOUR_WELCOME_MESSAGE")
+    bot.send_message(chat_id=update.message.chat_id, text="Say stuff, I'll transcribe")
 
 
+@run_async
 def voice_to_text(bot, update):
-    chat_id = update.message.chat_id
+    chat_id = update.message.chat.id
+    file_name = str(chat_id) + '_' + str(update.message.from_user.id) + str(update.message.message_id) + '.ogg'
 
-    bot.getFile(update.message.voice.file_id).download('voice.ogg')
-    tag = TinyTag.get('voice.ogg')
+    update.message.voice.get_file().download(file_name)
+    tag = TinyTag.get(file_name)
     length = tag.duration
+
     speech_client = speech.SpeechClient()
 
     to_gs = length > 58
@@ -39,30 +44,35 @@ def voice_to_text(bot, update):
         storage_client = storage.Client()
 
         bucket = storage_client.get_bucket(BUCKET_NAME)
-        blob = bucket.blob('voice.ogg')
-        blob.upload_from_filename('voice.ogg')
-        audio = types.RecognitionAudio(uri='gs://' + BUCKET_NAME + '/voice.ogg')
+        blob = bucket.blob(file_name)
+        blob.upload_from_filename(file_name)
+        audio = types.RecognitionAudio(uri='gs://' + BUCKET_NAME + '/' + file_name)
     else:
-        with io.open('voice.ogg', 'rb') as audio_file:
+        with io.open(file_name, 'rb') as audio_file:
             content = audio_file.read()
             audio = types.RecognitionAudio(content=content)
 
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.OGG_OPUS,
-        sample_rate_hertz=16000,
+        sample_rate_hertz=tag.samplerate,
         language_code='ru-RU')
 
     bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     response = speech_client.long_running_recognize(config, audio).result(timeout=500) \
         if to_gs else \
         speech_client.recognize(config, audio)
+    
+    message_text = ''
     for result in response.results:
-        bot.send_message(update.message.chat_id, result.alternatives[0].transcript)
+        message_text += result.alternatives[0].transcript + '\n'
+
+    update.message.reply_text(message_text)
+    os.remove(file_name)
 
 
 def ping_me(bot, update, error):
     if not error.message == 'Timed out':
-        bot.send_message(chat_id=123456, text=error.message) # YOUR_CHAT_ID
+        bot.send_message(chat_id=ADMIN_CHAT_ID, text=error.message)
 
 
 start_handler = CommandHandler(str('start'), start)
