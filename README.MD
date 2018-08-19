@@ -12,6 +12,8 @@ Simple Telegram bot that converts voice messages to text using Google Speech. Cu
 pip install --upgrade python-telegram-bot
 pip install --upgrade TinyTag
 pip install --upgrade google-cloud
+pip install --upgrade google-cloud-speech
+pip install --upgrade google-cloud-storage
 ```
 2. Go to [Google Cloud](https://cloud.google.com/) and set up a new project. You will need Google Speech API. For messages longer than 1m you will also need Google Storage
 3. Generate new service account and download a private key as JSON
