@@ -30,7 +30,7 @@ You will need to pass your credentials JSON to the container and to pass the env
 Run command will look something like this:
 
 ```
-docker run --name voicos \
+docker run -d --restart unless-stopped --name voicos \
    -v /path/to/credentials.json:/app/credentials.json \
    -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json \
    -e VOICOS_TOKEN -e VOICOS_BUCKET -e VOICOS_ADMIN_ID \
