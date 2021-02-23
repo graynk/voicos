@@ -3,7 +3,7 @@ Simple Telegram bot that converts voice messages to text using Google Speech. Cu
 
 ## Dependencies
 * python-telegram-bot
-* pymediainfo
+* pymediainfo (and a system library libmediainfo)
 * google-cloud-speech
 * google-cloud-storage
 
@@ -22,6 +22,20 @@ pip install -r requirements.txt
 2. Set up `VOICOS_TOKEN`, `VOICOS_BUCKET` and `VOICOS_ADMIN_ID` environment variables
 2. Run the bot
 `python3 bot.py`
+
+
+## Docker support
+You will need to pass your credentials JSON to the container and to pass the environment variables with tokens and such.
+
+Run command will look something like this:
+
+```
+docker run --name voicos \
+   -v /path/to/credentials.json:/app/credentials.json \
+   -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json \
+   -e VOICOS_TOKEN -e VOICOS_BUCKET -e VOICOS_ADMIN_ID \
+   ghcr.io/graynk/voicos
+```
 
 ## Usage
 Launch the bot, forward the voice message, easy. Works in group chats as well. 

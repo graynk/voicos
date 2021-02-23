@@ -1,0 +1,11 @@
+FROM python:3.9-slim-buster
+
+COPY bot.py /app/bot.py
+COPY requirements.txt /
+
+RUN apt-get update && apt-get install libmediainfo0v5 -y
+RUN pip3 install -r requirements.txt
+
+WORKDIR app
+
+ENTRYPOINT ["python3", "bot.py"]
