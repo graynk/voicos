@@ -80,9 +80,9 @@ def ping_me(update: Update, context: CallbackContext) -> None:
 
 if __name__ == '__main__':
     start_handler = CommandHandler('start', start)
-    oh_handler = MessageHandler(Filters.voice, voice_to_text)
+    voice_handler = MessageHandler(Filters.voice, voice_to_text, run_async=True)
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(oh_handler)
+    dispatcher.add_handler(voice_handler)
     dispatcher.add_error_handler(ping_me)
     updater.start_polling()
     updater.idle()
