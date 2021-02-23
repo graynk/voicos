@@ -34,7 +34,7 @@ docker run -d --restart unless-stopped --name voicos \
    -v /path/to/credentials.json:/app/credentials.json \
    -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json \
    -e VOICOS_TOKEN -e VOICOS_BUCKET -e VOICOS_ADMIN_ID \
-   ghcr.io/graynk/voicos:1.1
+   ghcr.io/graynk/voicos:latest
 ```
 
 ## Usage
