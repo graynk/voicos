@@ -40,6 +40,7 @@ def voice_to_text(update: Update, context: CallbackContext) -> None:
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.OGG_OPUS,
         sample_rate_hertz=media_info.audio_tracks[0].sampling_rate,
+        enable_automatic_punctuation=True,
         language_code='ru-RU')
 
     update.effective_message.reply_chat_action(action=ChatAction.TYPING)
