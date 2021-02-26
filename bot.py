@@ -9,6 +9,7 @@ from telegram import ChatAction, Update
 from google.cloud import speech
 from google.cloud import storage
 from pymediainfo import MediaInfo
+from datetime import datetime, timezone
 import os
 import io
 
@@ -25,10 +26,14 @@ storage_client = storage.Client()
 
 
 def start(update: Update, context: CallbackContext) -> None:
+    if (datetime.now(timezone.utc) - update.effective_message.date).days > 3:
+        return
     update.effective_message.reply_text("Say stuff, I'll transcribe")
 
 
 def voice_to_text(update: Update, context: CallbackContext) -> None:
+    if (datetime.now(timezone.utc) - update.effective_message.date).days > 3:
+        return
     chat_id = update.message.chat.id
     file_name = '%s_%s%s.ogg' % (chat_id, update.message.from_user.id, update.message.message_id)
 
