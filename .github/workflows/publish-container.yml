@@ -24,3 +24,10 @@ jobs:
           pull: true
           push: true
           tags: ghcr.io/graynk/voicos:latest
+  watchtower:
+    runs-on: ubuntu-latest
+    steps:
+      - name: curl
+        uses: wei/curl@v1
+        with:
+          args: -H ${{ secrets.WATCHTOWER_TOKEN }} ${{ secrets.SERVER_IP }}/v1/update
