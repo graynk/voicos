@@ -121,7 +121,7 @@ def download_and_prep(file_name: str, message: Message, voice: Voice) -> bool:
 if __name__ == '__main__':
     start_handler = CommandHandler('start', start)
     voice_handler = MessageHandler(Filters.voice & DateFilter(), voice_to_text, run_async=True)
-    language_handler = MessageHandler(Filters.reply & DateFilter(), transcribe_with_langcode, run_async=True)
+    language_handler = MessageHandler(Filters.reply & Filters.text & DateFilter(), transcribe_with_langcode, run_async=True)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(voice_handler)
