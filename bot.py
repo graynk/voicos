@@ -46,7 +46,8 @@ def transcribe_with_langcode(update: Update, context: CallbackContext) -> None:
     message_text = transcribe(file_name, to_gs, lang_code=message.text)
 
     if message_text == '':
-        update.effective_message.reply_text('Welp. Transcription results are still empty, but we tried, right?')
+        update.effective_message.reply_text('Welp. Transcription results are still empty, but we tried, right?',
+                                            quote=True)
         return
     update.effective_message.reply_text(message_text)
 
@@ -60,9 +61,10 @@ def voice_to_text(update: Update, context: CallbackContext) -> None:
 
     if message_text == '':
         update.effective_message.reply_text('Transcription results are empty. You can try setting language manually by '
-                                            'replying to the voice message with the language code like ru-RU or en-US')
+                                            'replying to the voice message with the language code like ru-RU or en-US',
+                                            quote=True)
         return
-    update.effective_message.reply_text(message_text)
+    update.effective_message.reply_text(message_text, quote=True)
 
 
 def ping_me(update: Update, context: CallbackContext) -> None:
