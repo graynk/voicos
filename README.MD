@@ -31,9 +31,8 @@ Run command will look something like this:
 
 ```
 docker run -d --restart unless-stopped --name voicos \
-   -v /path/to/credentials.json:/app/credentials.json \
-   -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json \
-   -e VOICOS_TOKEN -e VOICOS_BUCKET -e VOICOS_ADMIN_ID \
+   --mount type=bind,source=/path/to/credentials.json,target=/app/credentials.json,readonly \ 
+   --env-file voicos.env \
    ghcr.io/graynk/voicos:latest
 ```
 
