@@ -143,8 +143,8 @@ def transcribe(file_name: str, message: Message, lang_code: str = 'ru-RU', alter
                     (message.chat_id,))
         cur.execute("update customer set balance = balance - (%s);",
                     (actual_duration,))
-        cur.execute("insert into stat(user_id, message_timestamp, duration) values (%s, %s, %s);",
-                    (message.chat_id, message.date, actual_duration))
+        cur.execute("insert into stat(user_id, message_timestamp, duration) values (%s, current_timestamp, %s);",
+                    (message.chat_id, actual_duration))
         conn.commit()
 
     os.remove(file_name)
