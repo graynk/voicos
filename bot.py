@@ -35,7 +35,7 @@ updater = Updater(TOKEN)
 dispatcher = updater.dispatcher
 speech_client = SpeechClient()
 storage_client = storage.Client()
-conn = psycopg2.connect('host=localhost dbname=voicos user=postgres password=bruhpostgres')
+conn = psycopg2.connect('host=db dbname=voicos user=bot password=voicosdb')
 
 
 def start(update: Update, context: CallbackContext) -> None:
