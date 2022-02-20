@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+
+  db:
+    image: postgres:14.2
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=bot
+      - POSTGRES_PASSWORD=voicosdb
+      - POSTGRES_DB=voicos
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+    - ./data:/var/lib/postgresql/data:rw
+    - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
+
+  app:
+    build:
+      context: ./
+    depends_on:
+      - db
+    image: ghcr.io/graynk/voicos
+    restart: unless-stopped
+    env_file:
+      - voicos.dev.env
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro

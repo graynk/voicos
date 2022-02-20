@@ -1,0 +1,6 @@
+.idea/
+data/
+venv/
+postgres.conf
+voicos.dev.env
+voicos*.json

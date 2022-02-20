@@ -5,8 +5,9 @@ import os
 import subprocess
 from typing import List
 
+import psycopg2
 from google.cloud import storage
-from google.cloud.speech_v1p1beta1 import SpeechClient, RecognitionConfig, RecognitionAudio, RecognizeResponse
+from google.cloud.speech import SpeechClient, RecognitionConfig, RecognitionAudio, RecognizeResponse
 from pymediainfo import MediaInfo
 from telegram import ChatAction, Update, Message
 from telegram.constants import MAX_MESSAGE_LENGTH
@@ -34,6 +35,7 @@ updater = Updater(TOKEN)
 dispatcher = updater.dispatcher
 speech_client = SpeechClient()
 storage_client = storage.Client()
+conn = psycopg2.connect('host=db dbname=voicos user=bot password=voicosdb')
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -81,7 +83,7 @@ def transcribe_with_langcode(update: Update, context: CallbackContext) -> None:
     file_name = '%s_%s%s.ogg' % (message.chat_id, reply_message.from_user.id, reply_message.message_id)
     download_and_prep(file_name, reply_message)
 
-    transcriptions = transcribe(file_name, reply_message, lang_code=message.text)
+    transcriptions = transcribe(file_name, reply_message, lang_code=message.text, alternatives=[])
 
     if len(transcriptions) == 0 or transcriptions[0] == '':
         message.reply_text('Welp. Transcription results are still empty, but we tried, right?',
@@ -100,11 +102,12 @@ def ping_me(update: Update, context: CallbackContext) -> None:
         context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=err)
 
 
-def transcribe(file_name: str, message: Message, lang_code: str = 'ru-RU') -> List[str]:
+def transcribe(file_name: str, message: Message, lang_code: str = 'ru-RU', alternatives: List[str] = ['en-US', 'uk-UA']) -> List[str]:
     media_info = MediaInfo.parse(file_name)
     if len(media_info.audio_tracks) != 1 or not hasattr(media_info.audio_tracks[0], 'sampling_rate'):
         os.remove(file_name)
         raise ValueError('Failed to detect sample rate')
+    actual_duration = round(media_info.audio_tracks[0].duration / 1000)
 
     sample_rate = media_info.audio_tracks[0].sampling_rate
     encoding = RecognitionConfig.AudioEncoding.OGG_OPUS
@@ -122,17 +125,27 @@ def transcribe(file_name: str, message: Message, lang_code: str = 'ru-RU') -> Li
         encoding=encoding,
         sample_rate_hertz=sample_rate,
         enable_automatic_punctuation=True,
-        language_code=lang_code
+        language_code=lang_code,
+        alternative_language_codes=alternatives,
     )
 
     try:
         response = upload_to_gs(file_name, config) \
-            if message.voice.duration > UPLOAD_LIMIT \
+            if actual_duration > UPLOAD_LIMIT \
             else regular_upload(file_name, config)
     except Exception as e:
         print(e)
         os.remove(file_name)
         return ['Failed']
+
+    with conn.cursor() as cur:
+        cur.execute("insert into customer(user_id) values (%s) on conflict (user_id) do nothing;",
+                    (message.chat_id,))
+        cur.execute("update customer set balance = balance - (%s);",
+                    (actual_duration,))
+        cur.execute("insert into stat(user_id, message_timestamp, duration) values (%s, %s, %s);",
+                    (message.chat_id, message.date, actual_duration))
+        conn.commit()
 
     os.remove(file_name)
 
@@ -202,6 +215,11 @@ def resample(file_name) -> (RecognitionConfig.AudioEncoding, str, int):
 
 
 if __name__ == '__main__':
+    with conn.cursor() as cur:
+        cur.execute("create table if not exists customer (user_id bigint primary key, balance integer default 1200);")
+        cur.execute("create table if not exists stat (id serial primary key, user_id bigint references customer(user_id), message_timestamp timestamp, duration integer);")
+        conn.commit()
+
     start_handler = CommandHandler('start', start)
     voice_handler = MessageHandler(Filters.voice & DateFilter(), voice_to_text, run_async=True)
     language_handler = MessageHandler(Filters.reply & Filters.text & DateFilter(), transcribe_with_langcode,
