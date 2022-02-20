@@ -35,7 +35,7 @@ updater = Updater(TOKEN)
 dispatcher = updater.dispatcher
 speech_client = SpeechClient()
 storage_client = storage.Client()
-conn = psycopg2.connect('host=db dbname=voicos user=bot password=voicosdb')
+conn = psycopg2.connect('host=localhost dbname=voicos user=postgres password=bruhpostgres')
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -141,8 +141,8 @@ def transcribe(file_name: str, message: Message, lang_code: str = 'ru-RU', alter
     with conn.cursor() as cur:
         cur.execute("insert into customer(user_id) values (%s) on conflict (user_id) do nothing;",
                     (message.chat_id,))
-        cur.execute("update customer set balance = balance - (%s);",
-                    (actual_duration,))
+        cur.execute("update customer set balance = balance - (%s) where user_id = (%s);",
+                    (actual_duration, message.chat_id))
         cur.execute("insert into stat(user_id, message_timestamp, duration) values (%s, current_timestamp, %s);",
                     (message.chat_id, actual_duration))
         conn.commit()
