@@ -6,6 +6,7 @@ Simple Telegram bot that converts voice messages to text using Google Speech. Cu
 * pymediainfo (and a system library libmediainfo)
 * google-cloud-speech
 * google-cloud-storage
+* psycopg2-binary (and, well, PostgreSQL itself)
 
 ## Installation
 1. Install the libraries via pip:
