@@ -1,5 +1,5 @@
 # Voicos
-Simple Telegram bot that converts voice messages to text using Google Speech. Currently can be found on [@voicos_bot](https://t.me/voicos_bot)
+Simple Telegram bot that converts voice messages to text using Google Speech. Can be found at [@voicos_bot](https://t.me/voicos_bot), but currently disabled, since Google won't accept my credit cards :')
 
 ## Dependencies
 * python-telegram-bot
